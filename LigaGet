@@ -8,7 +8,17 @@ import time
 
 path = os.getcwd()+'\phantomjs.exe'
 driver = webdriver.PhantomJS(executable_path=path)
-driver.get("http://www.laliga.es/en/laliga-santander#box-resultados-competicion.html")
+driver.get("http://www.laliga.es/en/laliga-santander")
+myhtml = urlopen("http://www.laliga.es/en/laliga-santander")
+bsObj=BeautifulSoup(myhtml,"html.parser")
+
+#get the team names in the order of place
+teams = bsObj.findAll("span",{"class":"nombre-equipo-clasificacion"})
+for team in teams:
+    print(team.get_text())
+
+
+
 #get current playday result
 plays = driver.find_elements(By.CSS_SELECTOR,".equipos-resultados")
 for play in plays:
@@ -57,3 +67,4 @@ for play in plays:
     print(teamLocal.text)
     print(playResult.text)
     print(teamAway.text)
+
