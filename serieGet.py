@@ -32,20 +32,22 @@ def getLastPlayday(currentDay,noDay):
 
 def getNextPlayday(currentDay,noDay):
     if (noDay <= 1):
-        dayXpathf2 = "//../li[@class='box_Ngiornata_andata']" + "[" + str(noPlayday + 1) + "]/a"
+        dayXpathf2 = "//../li[@class='box_Ngiornata_andata']" + "[" + str(noPlayday) + "]/a"
         nextDay = currentDay[0].find_elements_by_xpath(dayXpathf2)
     elif (noDay < 19):
-        dayXpathf2 = "//../li[@class='box_Ngiornata_andata']" + "[" + str(noPlayday + 1) + "]/a"
+        dayXpathf2 = "//../li[@class='box_Ngiornata_andata']" + "[" + str(noPlayday) + "]/a"
         nextDay = currentDay[0].find_elements_by_xpath(dayXpathf2)
     elif (noDay == 19):
-        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 18) + "]/a"
+        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 19) + "]/a"
         nextDay = currentDay[0].find_elements_by_xpath(dayXpathf2)
     elif (noDay == 20):
-        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 18) + "]/a"
+        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 19) + "]/a"
         nextDay = currentDay[0].find_elements_by_xpath(dayXpathf2)
     elif (noDay < 38):
-        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 18) + "]/a"
+        dayXpathf2 = "//../li[@class='box_Ngiornata_ritorno']" + "[" + str(noPlayday - 19) + "]/a"
         nextDay = currentDay[0].find_elements_by_xpath(dayXpathf2)
+        nextDayTest = currentDay[0].find_elements_by_xpath("//../li[@class='box_Ngiornata_ritorno']")
+        print("noDay<38")
     elif (noDay == 38):
         nextDay = []
     else:
@@ -121,24 +123,27 @@ time.sleep(6)
 matchList1 = driver.find_elements(By.CSS_SELECTOR,".box-partita.col-xs-12.col-sm-4.col-md-3 ")
 matchesInfo1 = getCurrentDayMatch(matchList1,teamsName)
 
+currentPlayday = driver.find_elements(By.CSS_SELECTOR,".active ")
 if(noPlayday==1):
-    nextPlayday = getNextPlayday(matchesInfo1,noPlayday)
+    nextPlayday = getNextPlayday(currentPlayday,noPlayday)
     nextPlayday[0].click();
 elif (noPlayday==38):
-    nextPlayday = getNextPlayday(matchesInfo1, noPlayday-1)
+    nextPlayday = getNextPlayday(currentPlayday, noPlayday-1)
     nextPlayday[0].click();
+    print("noPlayDay==38")
 elif((noPlayday>1)and(noPlayday<38)):
-    nextPlayday = getNextPlayday(matchesInfo1, noPlayday - 1)
+    nextPlayday = getNextPlayday(currentPlayday, noPlayday - 1)
     nextPlayday[0].click();
     time.sleep(6)
-    nextPlayday = getNextPlayday(matchesInfo1, noPlayday)
+    nextPlayday = getNextPlayday(currentPlayday, noPlayday)
     nextPlayday[0].click();
 else:
     print("noPlayDay out of range")
 
 time.sleep(6)
-matchList2 = driver.find_elements(By.CSS_SELECTOR,".box-partita.col-xs-12.col-sm-4.col-md-3 ")
-matchesInfo2 = getCurrentDayMatch(matchList1,teamsName)
+if(noPlayday!=38):
+    matchList2 = driver.find_elements(By.CSS_SELECTOR, ".box-partita.col-xs-12.col-sm-4.col-md-3 ")
+    matchesInfo2 = getCurrentDayMatch(matchList1, teamsName)
 
 testa = matchesInfo_0
 print(teamTable)
