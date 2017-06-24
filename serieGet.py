@@ -6,6 +6,12 @@ from selenium.webdriver.common.by import By
 import os
 import time
 import requests
+import pymysql
+#GRANT USAGE ON *.* TO 'pyScraper'@'%' IDENTIFIED BY 'pyscraper123' WITH GRANT OPTION;
+#GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP ON pyScraping.*  TO 'pyScraper'@'%' IDENTIFIED BY 'pyscraper123';
+conn = pymysql.connect(host='127.0.0.1', user='pyScraper', passwd='pyscraper123', db='pyScraping', port=3306)
+cur = conn.cursor()
+cur.execute("USE pyScraping")
 
 def getLastPlayday(currentDay,noDay):
     if (noDay <= 1):
@@ -97,8 +103,11 @@ for teamTable in bigTeamTable:
                 teamInfo = []
 
 teamsName = []
+cur.execute("TRUNCATE serieteams")
 for iTeam2 in range(0,len(teamsInfo)):
     teamsName.append(teamsInfo[iTeam2][1])
+    cur.execute("INSERT INTO serieTeams (Teamid,TeamName,current_place) VALUES (\"%s\",\"%s\",\"%s\")",(iTeam2+1,teamsInfo[iTeam2][1],iTeam2+1))
+    cur.connection.commit()
 
 driver.get("http://www.legaseriea.it/en/serie-a-tim/fixture-and-results")
 time.sleep(6)
@@ -123,6 +132,8 @@ time.sleep(6)
 matchList1 = driver.find_elements(By.CSS_SELECTOR,".box-partita.col-xs-12.col-sm-4.col-md-3 ")
 matchesInfo1 = getCurrentDayMatch(matchList1,teamsName)
 
+
+
 currentPlayday = driver.find_elements(By.CSS_SELECTOR,".active ")
 if(noPlayday==1):
     nextPlayday = getNextPlayday(currentPlayday,noPlayday)
@@ -145,7 +156,9 @@ if(noPlayday!=38):
     matchList2 = driver.find_elements(By.CSS_SELECTOR, ".box-partita.col-xs-12.col-sm-4.col-md-3 ")
     matchesInfo2 = getCurrentDayMatch(matchList1, teamsName)
 
-testa = matchesInfo_0
+cur.close()
+conn.close()
+#testa = matchesInfo_0
 print(teamTable)
 #teams = bsObj.findAll(lambda e: e.name=="section" and )
 #teams1 = bsObj.find_all(True)
