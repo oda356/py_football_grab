@@ -4,7 +4,12 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 import os
 import time
+import pymysql
+import math
 
+conn = pymysql.connect(host='127.0.0.1', user='pyScraper', passwd='pyscraper123', db='pyScraping', port=3306)
+cur = conn.cursor()
+cur.execute("USE pyScraping")
 
 path = os.getcwd()+'\phantomjs.exe'
 driver = webdriver.PhantomJS(executable_path=path)
@@ -17,10 +22,16 @@ teams = bsObj.findAll("span",{"class":"nombre-equipo-clasificacion"})
 for team in teams:
     print(team.get_text())
 
-
+cur.execute("TRUNCATE ligateams")
+for iTeam in range(1,len(teams)):
+    cur.execute("INSERT INTO ligaTeams (Teamid,TeamName,current_place) VALUES (\"%s\",\"%s\",\"%s\")",
+                (iTeam + 1, teams[iTeam].get_text(), iTeam + 1))
+    cur.connection.commit()
 
 #get current playday result
+cur.execute("TRUNCATE ligamatches_0")
 plays = driver.find_elements(By.CSS_SELECTOR,".equipos-resultados")
+iplay0 = 0
 for play in plays:
     teamLocal = play.find_element(By.CSS_SELECTOR,".equipo.local").find_element(By.CSS_SELECTOR,".team")
     playResult = play.find_element(By.CSS_SELECTOR,".hora-resultado").find_element(By.CSS_SELECTOR,".horario-partido")
@@ -28,6 +39,13 @@ for play in plays:
     print(teamLocal.text)
     print(playResult.text)
     print(teamAway.text)
+    result0 = playResult.text.split("-")
+    cur.execute(
+        "INSERT INTO ligamatches_0 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+        (iplay0 + 1, teamLocal.text, teamAway.text, int(result0[0]),
+         int(result0[1])))
+    cur.connection.commit()
+    iplay0 = iplay0 + 1
 time.sleep(1)
 #get previous playday result
 
@@ -40,14 +58,24 @@ except Exception as e:
     print(e)
     plays = []
 
-
+iplay1 = 0
+cur.execute("TRUNCATE ligamatches_1")
 for play in plays:
-    teamLocal = play.find_element(By.CSS_SELECTOR,".equipo.local").find_element(By.CSS_SELECTOR,".team")
-    playResult = play.find_element(By.CSS_SELECTOR,".hora-resultado").find_element(By.CSS_SELECTOR,".horario-partido")
-    teamAway = play.find_element(By.CSS_SELECTOR,".equipo.visitante").find_element(By.CSS_SELECTOR,".team")
-    print(teamLocal.text)
-    print(playResult.text)
-    print(teamAway.text)
+    if(len(play.text)>0):
+        teamLocal = play.find_element(By.CSS_SELECTOR, ".equipo.local").find_element(By.CSS_SELECTOR, ".team")
+        playResult = play.find_element(By.CSS_SELECTOR, ".hora-resultado").find_element(By.CSS_SELECTOR,
+                                                                                        ".horario-partido")
+        teamAway = play.find_element(By.CSS_SELECTOR, ".equipo.visitante").find_element(By.CSS_SELECTOR, ".team")
+        print(teamLocal.text)
+        print(playResult.text)
+        print(teamAway.text)
+        result1 = playResult.text.split("-")
+        cur.execute(
+            "INSERT INTO ligamatches_1 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+            (iplay1 + 1, teamLocal.text, teamAway.text, int(result1[0]),
+             int(result1[1])))
+        cur.connection.commit()
+        iplay1 = iplay1 + 1
 
 #get next playday result
 try:
@@ -60,11 +88,29 @@ try:
 except Exception as e:
     print(e)
     plays = []
-for play in plays:
-    teamLocal = play.find_element(By.CSS_SELECTOR,".equipo.local").find_element(By.CSS_SELECTOR,".team")
-    playResult = play.find_element(By.CSS_SELECTOR,".hora-resultado").find_element(By.CSS_SELECTOR,".horario-partido")
-    teamAway = play.find_element(By.CSS_SELECTOR,".equipo.visitante").find_element(By.CSS_SELECTOR,".team")
-    print(teamLocal.text)
-    print(playResult.text)
-    print(teamAway.text)
 
+iplay2 = 0
+cur.execute("TRUNCATE ligamatches_2")
+for play in plays:
+    if(len(play.text)>0):
+        teamLocal = play.find_element(By.CSS_SELECTOR, ".equipo.local").find_element(By.CSS_SELECTOR, ".team")
+        playResult = play.find_element(By.CSS_SELECTOR, ".hora-resultado").find_element(By.CSS_SELECTOR,
+                                                                                        ".horario-partido")
+        teamAway = play.find_element(By.CSS_SELECTOR, ".equipo.visitante").find_element(By.CSS_SELECTOR, ".team")
+        print(teamLocal.text)
+        print(playResult.text)
+        print(teamAway.text)
+        result2 = playResult.text.split("-")
+        cur.execute(
+            "INSERT INTO ligamatches_1 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+            (iplay2 + 1, teamLocal.text, teamAway.text, int(result2[0]),
+             int(result2[1])))
+        cur.connection.commit()
+        iplay2 = iplay2 + 1
+
+storedTeams = cur.execute("select * from ligateams")
+storedTeamsInfo = cur.fetchmany(storedTeams)
+for storedTeamInfo in storedTeamsInfo:
+    print(storedTeamInfo)
+cur.close()
+conn.close()

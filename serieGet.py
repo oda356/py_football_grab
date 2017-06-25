@@ -7,6 +7,7 @@ import os
 import time
 import requests
 import pymysql
+import math
 #GRANT USAGE ON *.* TO 'pyScraper'@'%' IDENTIFIED BY 'pyscraper123' WITH GRANT OPTION;
 #GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP ON pyScraping.*  TO 'pyScraper'@'%' IDENTIFIED BY 'pyscraper123';
 conn = pymysql.connect(host='127.0.0.1', user='pyScraper', passwd='pyscraper123', db='pyScraping', port=3306)
@@ -115,6 +116,17 @@ driver.get("http://www.legaseriea.it/en/serie-a-tim/fixture-and-results")
 matchList = driver.find_elements(By.CSS_SELECTOR,".box-partita.col-xs-12.col-sm-4.col-md-3 ")
 matchesInfo = getCurrentDayMatch(matchList,teamsName)
 
+cur.execute("TRUNCATE seriematches_0")
+if(len(matchesInfo)>0):
+    for iMatch0 in range(0, math.floor(len(matchesInfo) / 4)):
+        cur.execute(
+            "INSERT INTO seriematches_0 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+            (iMatch0 + 1, matchesInfo[iMatch0 * 4 + 1], matchesInfo[iMatch0 * 4 + 3], int(matchesInfo[iMatch0 * 4]),
+             int(matchesInfo[iMatch0 * 4 + 2])))
+        cur.connection.commit()
+
+
+
 currentPlayday = driver.find_elements(By.CSS_SELECTOR,".active ")
 noPlayday = int(currentPlayday[0].text);
 lastPlayday = getLastPlayday(currentPlayday,noPlayday)
@@ -132,6 +144,15 @@ time.sleep(6)
 matchList1 = driver.find_elements(By.CSS_SELECTOR,".box-partita.col-xs-12.col-sm-4.col-md-3 ")
 matchesInfo1 = getCurrentDayMatch(matchList1,teamsName)
 
+cur.execute("TRUNCATE seriematches_1")
+if(len(matchesInfo1)>0):
+
+    for iMatch1 in range(0, math.floor(len(matchesInfo1) / 4)):
+        cur.execute(
+            "INSERT INTO seriematches_1 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+            (iMatch1 + 1, matchesInfo1[iMatch1 * 4 + 1], matchesInfo1[iMatch1 * 4 + 3], int(matchesInfo1[iMatch1 * 4]),
+             int(matchesInfo1[iMatch1 * 4 + 2])))
+        cur.connection.commit()
 
 
 currentPlayday = driver.find_elements(By.CSS_SELECTOR,".active ")
@@ -155,6 +176,17 @@ time.sleep(6)
 if(noPlayday!=38):
     matchList2 = driver.find_elements(By.CSS_SELECTOR, ".box-partita.col-xs-12.col-sm-4.col-md-3 ")
     matchesInfo2 = getCurrentDayMatch(matchList1, teamsName)
+else:
+    matchesInfo2 = []
+
+cur.execute("TRUNCATE seriematches_2")
+if(len(matchesInfo2)>0):
+    for iMatch2 in range(0, math.floor(len(matchesInfo2) / 4)):
+        cur.execute(
+            "INSERT INTO seriematches_2 (Matchid,Team1Name,Team2Name,Team1Score,Team2Score) VALUES (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\")",
+            (iMatch2 + 1, matchesInfo2[iMatch2 * 4 + 1], matchesInfo2[iMatch2 * 4 + 3], int(matchesInfo2[iMatch2 * 4]),
+             int(matchesInfo2[iMatch2 * 4 + 2])))
+        cur.connection.commit()
 
 cur.close()
 conn.close()
